@@ -5,6 +5,7 @@ from __future__ import (absolute_import, division, print_function)
 
 import locale
 import os.path
+from os.path import expanduser
 from os import stat as os_stat, lstat as os_lstat
 import random
 import re
@@ -335,6 +336,15 @@ class Directory(  # pylint: disable=too-many-instance-attributes,too-many-public
 
                 self.mount_path = mount_path(mypath)
 
+                def ignore_files():
+                    directory = expanduser("~")
+                    files = []
+                    for filename in os.listdir(directory):
+                        if filename.startswith("ranger_") and filename.endswith(".txt"):
+                            with open(os.path.join(directory, filename), 'r') as f:
+                                files += f.read().strip().split("\n")
+                    return list(set(files))
+
                 if self.flat:
                     filelist = []
                     for dirpath, dirnames, filenames in walklevel(mypath, self.flat):
@@ -348,11 +358,13 @@ class Directory(  # pylint: disable=too-many-instance-attributes,too-many-public
                         filelist += dirlist
                         filelist += [os.path.join("/", dirpath, f) for f in filenames]
                     filenames = filelist
+                    filenames = [f for f in filenames if not f in ignore_files()]
                     self.load_content_mtime = mtimelevel(mypath, self.flat)
                 else:
                     filelist = os.listdir(mypath)
                     filenames = [mypath + (mypath == '/' and fname or '/' + fname)
                                  for fname in filelist]
+                    filenames = [f for f in filenames if not f in ignore_files()]
                     self.load_content_mtime = os.stat(mypath).st_mtime
 
                 if self.cumulative_size_calculated:

@@ -91,11 +91,7 @@ class TitleBar(Widget):
     def _get_left_part(self, bar):
         # TODO: Properly escape non-printable chars without breaking unicode
         if self.settings.hostname_in_titlebar:
-            if self.fm.username == 'root':
-                clr = 'bad'
-            else:
-                clr = 'good'
-
+            clr = 'good'
             bar.add(self.fm.username, 'hostname', clr, fixed=True)
             bar.add('@', 'hostname', clr, fixed=True)
             bar.add(self.fm.hostname, 'hostname', clr, fixed=True)
